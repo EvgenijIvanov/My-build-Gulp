@@ -15,7 +15,36 @@ var   gulp          = require('gulp'),
       debug         = require('gulp-debug'),
       sourcemap     = require('gulp-sourcemaps'),
       gulpif        = require('gulp-if'),
+      rigger        = require('gulp-rigger'),
       isDevelopment = true;
+
+var pathAll = {
+    dist: {
+        html: 'dist/',
+        js: 'dist/js/',
+        css: 'dist/css/',
+        img: 'dist/img/',
+        fonts: 'dist/fonts/'
+    },
+    app:{
+        html: 'app/',
+        js: 'app/js/',
+        css: 'app/css/',
+        img: 'app/img/',
+        fonts: 'app/fonts/',
+        scss: 'app/style/',
+        libs: 'app/libs/'
+    },
+    watch: {
+        html: 'app/**/*.html',
+        js: 'app/js/**/*.js',
+        style: 'app/style/**/*.scss',
+        img: 'app/img/**/*.*',
+        css: 'app/css/**/*.*',
+        fonts: 'app/fonts/**/*.*'
+    },
+    clean: './build'
+};
 
 gulp.task('default', ['watch']);
 gulp.task('clear', function () {
@@ -37,12 +66,10 @@ gulp.task('css-libs', ['sass'], function() {
         .pipe(gulp.dest('app/css'));
 });
 gulp.task('scripts', function() {
-    return gulp.src([
-        'app/libs/jquery/dist/jquery.min.js',
-        'app/libs/magnific-popup/dist/jquery.magnific-popup.min.js'
-    ])
-        .pipe(concat('libs.min.js'))
+    return gulp.src('app/libs/main.js')
+        .pipe(rigger())
         .pipe(uglify())
+        .pipe(rename({suffix: '.min'}))
         .pipe(gulp.dest('app/js'));
 });
 gulp.task('browser-sync', function() {
@@ -57,9 +84,10 @@ gulp.task('cleanapp', function() {
     return del(['app/css','app/js']);
 });
 gulp.task('watch', ['browser-sync', 'css-libs', 'scripts'], function() {
-    gulp.watch('app/style/*.+(scss|sass|less)', ['sass']);
+    gulp.watch('app/style/**/*.scss', ['sass']);
     gulp.watch('app/**/*.html', browserSync.reload);
     gulp.watch('app/js/**/*.js', browserSync.reload);
+    gulp.watch('app/libs/*.js', browserSync.reload);
 
 });
 gulp.task('clean', function() {
