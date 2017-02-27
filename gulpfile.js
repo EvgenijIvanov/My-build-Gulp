@@ -87,7 +87,8 @@ gulp.task('watch', ['browser-sync', 'css-libs', 'scripts'], function() {
     gulp.watch('app/style/**/*.scss', ['sass']);
     gulp.watch('app/**/*.html', browserSync.reload);
     gulp.watch('app/js/**/*.js', browserSync.reload);
-    gulp.watch('app/libs/*.js', browserSync.reload);
+    gulp.watch('app/libs/**/*.js', browserSync.reload);
+    gulp.watch('app/libs/**/*.css', browserSync.reload);
 
 });
 gulp.task('clean', function() {
@@ -103,7 +104,7 @@ gulp.task('img', function() {
         })))
         .pipe(gulp.dest('dist/img'));
 });
-gulp.task('build', ['clean', 'img', 'sass', 'scripts'], function() {
+gulp.task('build', ['clean', 'img', 'css-libs', 'scripts'], function() {
 
     var buildCss = gulp.src('app/css/*.css')
         .pipe(gulp.dest('dist/css'));
