@@ -1,0 +1,5 @@
+@font-face {
+    font-family: "Test fonts";
+    src: local("Test fonts"),
+    url(test-fonts.otf);
+}

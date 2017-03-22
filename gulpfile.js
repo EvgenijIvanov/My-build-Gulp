@@ -16,6 +16,7 @@ var   gulp          = require('gulp'),
       sourcemap     = require('gulp-sourcemaps'),
       gulpif        = require('gulp-if'),
       rigger        = require('gulp-rigger'),
+      fileinclude   = require('gulp-file-include'),
       isDevelopment = true;
 
 var pathAll = {
@@ -50,6 +51,15 @@ gulp.task('default', ['watch']);
 gulp.task('clear', function () {
     return cache.clearAll();
 });
+gulp.task('htmldev', function () {
+    return gulp.src('app/pages/*.html') //Выберем файлы по нужному пути
+        .pipe(fileinclude({
+            prefix: '@gulp-'
+            // basepath: '@file'
+        }))
+        .pipe(gulp.dest('app')) //Выплюнем их в папку build
+        .pipe(browserSync.reload({stream: true})); //И перезагрузим наш сервер для обновлений
+});
 gulp.task('sass', function () {
     return gulp.src('app/style/*.{sass,scss,less}')
         .pipe(gulpif(isDevelopment, sourcemap.init()))
@@ -65,11 +75,18 @@ gulp.task('css-libs', ['sass'], function() {
         .pipe(rename({suffix: '.min'}))
         .pipe(gulp.dest('app/css'));
 });
-gulp.task('scripts', function() {
+gulp.task('scripts', ['html5shiv'], function() {
     return gulp.src('app/libs/main.js')
         .pipe(rigger())
         .pipe(uglify())
         .pipe(rename({suffix: '.min'}))
+        .pipe(gulp.dest('app/js'))
+        .pipe(browserSync.reload({stream: true}));
+});
+gulp.task('html5shiv', function () {
+    return gulp.src('app/libs/html5shiv/dist/*.min.js')
+        .pipe(concat('html5shiv.js'))
+        .pipe(uglify())
         .pipe(gulp.dest('app/js'));
 });
 gulp.task('browser-sync', function() {
@@ -83,8 +100,9 @@ gulp.task('browser-sync', function() {
 gulp.task('cleanapp', function() {
     return del(['app/css','app/js']);
 });
-gulp.task('watch', ['browser-sync', 'css-libs', 'scripts'], function() {
-    gulp.watch('app/style/**/*.scss', ['sass']);
+gulp.task('watch', ['browser-sync', 'css-libs', 'scripts' , 'htmldev'], function() {
+    gulp.watch('app/**/*.html', ['htmldev'], browserSync.reload);
+    gulp.watch('app/style/**/*.scss', ['sass'], browserSync.reload);
     gulp.watch('app/**/*.html', browserSync.reload);
     gulp.watch('app/js/**/*.js', browserSync.reload);
     gulp.watch('app/libs/**/*.js', browserSync.reload);
@@ -115,7 +133,13 @@ gulp.task('build', ['clean', 'img', 'css-libs', 'scripts'], function() {
     var buildJs = gulp.src('app/js/**/*')
         .pipe(gulp.dest('dist/js'));
 
+    var buildMail = gulp.src('app/mailsend/**/*.php')
+        .pipe(gulp.dest('dist/mailsend'));
+
     var buildHtml = gulp.src('app/*.html')
+        .pipe(gulp.dest('dist'));
+
+    var buildFav = gulp.src('app/*.ico')
         .pipe(gulp.dest('dist'));
 
 });
